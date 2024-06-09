@@ -1,4 +1,6 @@
-10
-2
-8 Birnin Zana
-5 Birnin S'Yan
+100
+4
+10 City1
+30 City2
+70 City3
+90 City4

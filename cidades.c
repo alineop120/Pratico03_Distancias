@@ -8,34 +8,60 @@ int comparaPosicao(const void *a, const void *b) {
     return ((Cidade *)a)->Posicao - ((Cidade *)b)->Posicao;
 }
 
+// Função para inicializar a estrutura Estrada a partir do arquivo
 Estrada *getEstrada(const char *nomeArquivo) {
     FILE *arquivo = fopen(nomeArquivo, "r");
     if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo '%s'. Certifique-se de que o arquivo existe e esta acessivel.\n", nomeArquivo);
+        printf("Erro ao abrir o arquivo '%s'. Certifique-se de que o arquivo existe e está acessivel.\n", nomeArquivo);
         return NULL;
     }
 
     Estrada *estrada = malloc(sizeof(Estrada));
     if (estrada == NULL) {
         fclose(arquivo);
-        printf("Erro de alocação de memoria.\n");
+        printf("Erro de alocacao de memoria.\n");
         return NULL;
     }
 
     fscanf(arquivo, "%d", &estrada->T);
     fscanf(arquivo, "%d", &estrada->N);
 
+    // Verifica as restrições
+    if (estrada->T < 3 || estrada->T > 1000000 || estrada->N < 2 || estrada->N > 10000) {
+        fclose(arquivo);
+        free(estrada);
+        return NULL;
+    }
+
     estrada->C = malloc(estrada->N * sizeof(Cidade));
     if (estrada->C == NULL) {
         fclose(arquivo);
         free(estrada);
-        printf("Erro de alocação de memoria.\n");
+        printf("Erro de alocacao de memoria.\n");
         return NULL;
     }
 
     for (int i = 0; i < estrada->N; i++) {
         fscanf(arquivo, "%d", &estrada->C[i].Posicao);
         fscanf(arquivo, "%s", estrada->C[i].Nome);
+
+        // Verifica as restrições
+        if (estrada->C[i].Posicao <= 0 || estrada->C[i].Posicao >= estrada->T) {
+            fclose(arquivo);
+            free(estrada->C);
+            free(estrada);
+            return NULL;
+        }
+
+        // Verifica se a posição é única
+        for (int j = 0; j < i; j++) {
+            if (estrada->C[j].Posicao == estrada->C[i].Posicao) {
+                fclose(arquivo);
+                free(estrada->C);
+                free(estrada);
+                return NULL;
+            }
+        }
     }
 
     fclose(arquivo);
@@ -46,6 +72,7 @@ Estrada *getEstrada(const char *nomeArquivo) {
     return estrada;
 }
 
+// Função para calcular a menor vizinhança
 double calcularMenorVizinhanca(const char *nomeArquivo) {
     Estrada *estrada = getEstrada(nomeArquivo);
     if (estrada == NULL) {
@@ -70,6 +97,7 @@ double calcularMenorVizinhanca(const char *nomeArquivo) {
     return menorVizinhanca;
 }
 
+// Função para encontrar a cidade com a menor vizinhança
 char *cidadeMenorVizinhanca(const char *nomeArquivo) {
     Estrada *estrada = getEstrada(nomeArquivo);
     if (estrada == NULL) {
@@ -96,7 +124,7 @@ char *cidadeMenorVizinhanca(const char *nomeArquivo) {
         strcpy(cidadeMenorCopia, cidadeMenor);
     } else {
         // Em caso de falha na alocação, retorna NULL
-        printf("Erro de alocação de memória.\n");
+        printf("Erro de alocacao de memoria.\n");
         free(estrada->C);
         free(estrada);
         return NULL;
@@ -106,28 +134,4 @@ char *cidadeMenorVizinhanca(const char *nomeArquivo) {
     free(estrada);
 
     return cidadeMenorCopia;
-}
-
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Uso: %s arquivo_entrada\n", argv[0]);
-        return 1;
-    }
-
-    char *nomeArquivo = argv[1];
-    double menorVizinhanca = calcularMenorVizinhanca(nomeArquivo);
-    char *cidadeMenor = cidadeMenorVizinhanca(nomeArquivo);
-
-    if (menorVizinhanca == -1.0 || cidadeMenor == NULL) {
-        printf("Erro ao calcular a menor vizinhanca ou determinar a cidade com menor vizinhanca.\n");
-        return 1;
-    }
-
-    printf("Menor vizinhanca: %.2f\n", menorVizinhanca);
-    printf("Cidade com menor vizinhanca: %s\n", cidadeMenor);
-
-    // Libera a memória alocada para o nome da cidade
-    free(cidadeMenor);
-
-    return 0;
 }

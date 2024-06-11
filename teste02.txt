@@ -1,0 +1,5 @@
+15
+3
+3 CidadeA
+8 CidadeB
+12 CidadeC

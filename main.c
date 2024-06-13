@@ -3,7 +3,7 @@
 #include "cidades.h"
 
 int main() {
-    const char *nomeArquivo = "teste01.txt";
+    const char *nomeArquivo = "teste02.txt";
 
     double menorVizinhanca = calcularMenorVizinhanca(nomeArquivo);
     if (menorVizinhanca != -1.0) {
